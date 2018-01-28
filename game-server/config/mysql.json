@@ -1,16 +1,16 @@
 {
   "development": {
-    "host" : "127.0.0.1",
+    "host" : "192.168.1.9",
     "port" : "3306",
-    "database" : "pomelo",
+    "database" : "cardgame",
     "user" : "root",
     "password" : ""
   },
 
   "production": {
-    "host" : "127.0.0.1",
+    "host" : "192.168.1.9",
     "port" : "3306",
-    "database" : "pomelo",
+    "database" : "cardgame",
     "user" : "root",
     "password" : ""
   }

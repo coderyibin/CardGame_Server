@@ -1,3 +1,5 @@
+var userDao = require("../../../dao/UserDao");
+
 module.exports = function(app) {
   return new Handler(app);
 };
@@ -36,12 +38,18 @@ Handler.prototype.login = function(msg, session, next) {
 	}
 	//将当前的session绑定一个uid
 	session.bind(uid);
-	var mysql = this.app.get("mysql");
-
-
-
-  	next(null, {code: 200, msg: 'game server is ok.'+mysql.host});
+	// var mysql = this.app.get("mysql");
+	userDao.Login(uid, password, next);
 };
+
+//设置玩家名称
+Handler.prototype.setName = function (msg, session, next) {
+	var uid = msg.uid;
+	var name = msg.name;
+	if (!! uid && !! name) {
+		userDao.setUserName(uid, name, next);
+	}
+}
 
 /**
  * Publish route for mqtt connector.
