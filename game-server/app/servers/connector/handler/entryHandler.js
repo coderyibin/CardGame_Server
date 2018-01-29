@@ -39,7 +39,17 @@ Handler.prototype.login = function(msg, session, next) {
 	//将当前的session绑定一个uid
 	session.bind(uid);
 	// var mysql = this.app.get("mysql");
-	userDao.Login(uid, password, next);
+	var self = this;
+	userDao.Login(uid, password, function () {
+		next(null, {code : 250});
+        var channelServer = self.app.get("channelService");
+        channelServer.getChannel("fu1", true);
+        var sid = self.app.getServerId();
+        console.log("**********");
+        console.log(sid);
+		//推送客户端进入房间
+        channelServer.pushMessageByUids("sys", {uid : uid}, [{uid : uid, sid : sid}], null, function (rs) {});
+	});
 };
 
 //设置玩家名称

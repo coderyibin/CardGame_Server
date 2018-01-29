@@ -4,6 +4,8 @@ var pomelo = require('pomelo').app.get("dbclient");
 
 var UserDao = module.exports;
 
+var channelServer = require('pomelo').app.get("channelService");
+
 //玩家登陆
 UserDao.Login = function (account, password, cb) {
 
@@ -18,11 +20,23 @@ UserDao.setUserName = function (uid, name, cb) {
         if (err) {
             console.log(err);
         } else {
-            var data = {
-                code : 200,
-                content : "角色创建成功，进入游戏!"
-            }
-            utils.invokeCallback(cb, null, data);
+            sql = "select * from playeritem where id = ?";
+            args = [1];
+            pomelo.query(sql, args, function (err, res) {
+                if (err) {
+                    console.log("为找到赠送的武侠");
+                    console.log(err);
+                } else {
+                    var data = {
+                        code : 200,
+                        content : "角色创建成功，进入游戏!",
+                        player : res
+                    }
+                    // utils.invokeCallback(cb, null, data);
+                    cb();
+
+                }
+            });
         }
     })
 }
@@ -42,7 +56,8 @@ UserDao.Register = function (account, password, cb) {
                 content : "账号创建成功，请创建角色名称！",
                 uid : res.insertId,
             }
-            utils.invokeCallback(cb, null, data);
+            // utils.invokeCallback(cb, null, data);
+            cb();
         }
     });
 
@@ -61,8 +76,9 @@ UserDao.QueryUserExits = function (account, password, cb) {
                 console.log("不存在当前用户，可以注册");
                 UserDao.Register(account, password, cb);
             } else {
-                console.log("用户存在，直接登陆", cb);
+                console.log("用户存在，直接登陆");
                 // UserDao.Login(account, password, cb);
+                cb();
             }
         }
     });
