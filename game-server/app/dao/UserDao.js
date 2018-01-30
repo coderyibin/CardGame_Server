@@ -14,37 +14,32 @@ UserDao.Login = function (account, password, cb) {
 
 //设置玩家名称
 UserDao.setUserName = function (uid, name, cb) {
-    var sql = 'update user set name = ? where id = ?';
+    var sql = 'update user set name = ? where account = ?';
     var args = [name, uid];
     pomelo.query(sql, args, function (err, res) {
         if (err) {
             console.log(err);
         } else {
-            sql = "select * from playeritem where id = ?";
-            args = [1];
-            pomelo.query(sql, args, function (err, res) {
-                if (err) {
-                    console.log("为找到赠送的武侠");
-                    console.log(err);
-                } else {
+            sql = "select * from user where account=?";
+            pomelo.query(sql, [uid], function (err, s) {
+                if (! err) {
                     var data = {
                         code : 200,
                         content : "角色创建成功，进入游戏!",
-                        player : res
-                    }
-                    // utils.invokeCallback(cb, null, data);
-                    cb();
+                        player : s
 
+                    }
+                    utils.invokeCallback(cb, null, data);
                 }
-            });
+            })
         }
     })
 }
 
 //玩家注册
 UserDao.Register = function (account, password, cb) {
-    var sql = 'insert into user (account, password, name, lastlogintime) values (?, ?, ?, ?)';
-    var args = [account, password, "test", new Date()];
+    var sql = 'insert into user (account, password, name, lastlogintime, firstpartner) values (?, ?, ?, ?, ?)';
+    var args = [account, password, "test", new Date(), 0];
     pomelo.insert(sql, args, function (err, res) {
         if (err) {
             console.log("玩家创建失败");
@@ -82,4 +77,30 @@ UserDao.QueryUserExits = function (account, password, cb) {
             }
         }
     });
+}
+
+//更新玩家第一只随从伙伴信息
+UserDao.upDatePartner = function (uid) {
+    var sql = "select firstpartner from user where id = ?";
+    var agrs = [uid];
+    pomelo.query(sql, agrs, function (err, res) {
+        if (err) {
+            console.log("err:UserData:upDatePartner", err);
+        } else {
+            if (res == 0) {
+                sql = "update user set firstpartner = ? where id = ?";
+                agrs = [1, uid];
+                pomelo.query(sql, agrs, function (err, res) {
+                    if (err) {
+                        console.log("err:UserData:upDatePartner-", err);
+                    } else {
+                        console.log("第一只随从更新成功");
+                        return true;
+                    }
+                })
+            } else  {
+                return false;
+            }
+        }
+    })
 }

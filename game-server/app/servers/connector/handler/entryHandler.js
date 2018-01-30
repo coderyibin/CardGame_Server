@@ -1,4 +1,5 @@
 var userDao = require("../../../dao/UserDao");
+var Code = require("../../../util/code")
 
 module.exports = function(app) {
   return new Handler(app);
@@ -41,18 +42,21 @@ Handler.prototype.login = function(msg, session, next) {
 	// var mysql = this.app.get("mysql");
 	var self = this;
 	userDao.Login(uid, password, function () {
-		next(null, {code : 250});
-        var channelServer = self.app.get("channelService");
-        var channel = channelServer.getChannel("fu1", true);
-        var sid = self.app.getServerId();
-        channel.add(uid, sid);
-        console.log("**********");
-        console.log(sid);
-        var uids = [{uid : uid, sid : sid}];
-        console.log("**********");
-        console.log(uids);
-		//推送客户端进入房间
-        channelServer.pushMessageByUids("onSys", {uid : uid}, uids, null, function (rs) {});
+		next(null, {
+			code : Code.OK,
+			uid : uid
+		});
+        // var channelServer = self.app.get("channelService");
+        // var channel = channelServer.getChannel("fu1", true);
+        // var sid = self.app.getServerId();
+        // channel.add(uid, sid);
+        // console.log("**********");
+        // console.log(sid);
+        // var uids = [{uid : uid, sid : sid}];
+        // console.log("**********");
+        // console.log(uids);
+        // //推送客户端进入房间
+        // channelServer.pushMessageByUids("onSys", {uid : uid}, uids, null, function (rs) {});
 	});
 };
 
