@@ -41,18 +41,11 @@ Handler.prototype.login = function(msg, session, next) {
 	session.bind(uid);
 	// var mysql = this.app.get("mysql");
 	var self = this;
-	userDao.Login(uid, password, function (msg) {
-		if (msg.ok) {
-			var data = {
-				type : 0,//存在账号
-			}
-		} else {
-            var data = {
-                type : 1,//新建账号
-            }
-		}
-		data["code"] = Code.OK;
-		next(null, data);
+	userDao.Login(uid, password, function () {
+		next(null, {
+			code : Code.OK,
+			uid : uid
+		});
         // var channelServer = self.app.get("channelService");
         // var channel = channelServer.getChannel("fu1", true);
         // var sid = self.app.getServerId();
