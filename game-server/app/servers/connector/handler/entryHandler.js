@@ -41,21 +41,28 @@ Handler.prototype.login = function(msg, session, next) {
 	session.bind(uid);
 	// var mysql = this.app.get("mysql");
 	var self = this;
-	userDao.Login(uid, password, function () {
-		next(null, {
-			code : Code.OK,
-			uid : uid
-		});
+	userDao.Login(uid, password, function (msg) {
+		if (msg.ok) {
+			var data = {
+				type : 0,//存在账号
+			}
+		} else {
+            var data = {
+                type : 1,//新建账号
+            }
+		}
+		data["code"] = Code.OK;
+		next(null, data);
         // var channelServer = self.app.get("channelService");
         // var channel = channelServer.getChannel("fu1", true);
         // var sid = self.app.getServerId();
         // channel.add(uid, sid);
-        // console.log("**********");
-        // console.log(sid);
+        // // console.log("**********");
+        // // console.log(sid);
         // var uids = [{uid : uid, sid : sid}];
-        // console.log("**********");
-        // console.log(uids);
-        // //推送客户端进入房间
+        // // console.log("**********");
+        // // console.log(uids);
+        // // //推送客户端进入房间
         // channelServer.pushMessageByUids("onSys", {uid : uid}, uids, null, function (rs) {});
 	});
 };

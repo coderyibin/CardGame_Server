@@ -43,3 +43,24 @@ handler.queryEntry = function(msg, session, next) {
         port: res.clientPort
     });
 };
+
+handler.Test = function (msg, session, next) {
+    var uid = msg.uid;
+    var sid = this.app.getServerId();
+    var channelServer = this.app.get("channelService");
+    var channel = channelServer.getChannel("ss", true);
+    channel.add(uid, sid)
+    // channel.pushMessageByUids("onJoinRoom", {roomId : "456"}, uids, null, function (rs) {});
+    next(null, {code:200, content : "456132"});
+
+    session.bind(uid)
+    session.set("roomId", 66);
+    session.push("roomId", function (err) {
+        if (err) {
+            console.error('set rid for session service failed! error is : %j', err.stack);
+        }
+    });
+
+    var uids = [{uid : uid, sid : sid}];
+    channelServer.pushMessageByUids("onJoinRoom", {roomId : 88, main : uid, uid : uid}, uids, null, function (rs) {});
+}
