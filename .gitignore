@@ -4,6 +4,8 @@
 
 game-server/logs/
 game-server/node_modules/
+game-server/config/mysql.json
+game-server/config/server.json
 
 #/////////////////////////////////////////////////////////////////////////////
 # Logs and databases
