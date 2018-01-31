@@ -22,42 +22,25 @@ Handler.prototype.entry = function(msg, session, next) {
 };
 
 Handler.prototype.login = function(msg, session, next) {
-	if (! msg.uid || ! msg.password) {
+	if (! msg.account || ! msg.password) {
 		next(null, {
 			code : 500,
 			contnet : "输入的账号或者密码不合法"
 		});
 		return;
 	}
-	var uid = msg.uid;
+	var account = msg.account;
 	var password = msg.password;
-	var session = this.app.get("sessionService");
-	var ssion = session.getByUid(uid);
-	if (!! ssion) {
-		next(null, {code : 500, content : "您的账号已经在其他设备登录！"});
-		return;
-	}
-	//将当前的session绑定一个uid
-	session.bind(uid);
-	// var mysql = this.app.get("mysql");
-	var self = this;
-	userDao.Login(uid, password, function () {
-		next(null, {
-			code : Code.OK,
-			uid : uid
-		});
-        // var channelServer = self.app.get("channelService");
-        // var channel = channelServer.getChannel("fu1", true);
-        // var sid = self.app.getServerId();
-        // channel.add(uid, sid);
-        // // console.log("**********");
-        // // console.log(sid);
-        // var uids = [{uid : uid, sid : sid}];
-        // // console.log("**********");
-        // // console.log(uids);
-        // // //推送客户端进入房间
-        // channelServer.pushMessageByUids("onSys", {uid : uid}, uids, null, function (rs) {});
-	});
+	var sessionService = this.app.get("sessionService");
+	sessionService.kick(account, function () {});
+    // var ssion = sessionService.getByUid(account);
+	// if (!! ssion) {
+	// 	next(null, {code : Code.NONE, content : "您的账号已经在其他设备登录！"});
+	// 	return;
+	// }
+    //将当前的session绑定一个uid
+    session.bind(account);
+	userDao.Login(account, password, session, next);
 };
 
 //设置玩家名称
