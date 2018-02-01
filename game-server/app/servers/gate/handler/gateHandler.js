@@ -23,7 +23,6 @@ handler.queryEntry = function(msg, session, next) {
     if(!uid) {
         next(null, {
             code: 500
-
         });
         return;
     }

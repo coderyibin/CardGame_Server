@@ -1,13 +1,11 @@
 var utils = require('../util/utils');
-var logger = require('pomelo-logger').getLogger('pomelo');
-var pomelo = require('pomelo').app.get("dbclient");
+var dbclient = require('pomelo').app.get("dbclient");
+var pomelo = require('pomelo');
 var md5 = require("MD5");
 var Code = require("../util/code");
 var PushKey = require("../util/pushKey");
 var channelService = require("pomelo").app.get("channelService");
 var UserDao = module.exports;
-
-var channelServer = require('pomelo').app.get("channelService");
 
 //玩家登陆
 UserDao.Login = function (account, password, session, cb, exits) {
@@ -15,59 +13,86 @@ UserDao.Login = function (account, password, session, cb, exits) {
     if (! exits) {
         this.QueryUserExits(account, password, session, cb);
     } else {
+
         var passmd5 = md5(password);
-        var sql = "select * from user where account = ?";
-        var args = [account];
-        pomelo.query(sql, args, function (err, res) {
-            if (! err) {
-                res = res[0];
-                if (res.password == passmd5) {//密码正确，进入游戏
-                    session.bind(res.id);
-                    var uids = [{uid : account, sid : require('pomelo').app.getServerId()}];
-                    if (res.name == "") {
-                        utils.invokeCallback(cb, null, {code : Code.OK, uid : res.id});
-                        // channelServer.pushMessageByUids("onSys",
-                        //     {key : PushKey.SET_NAME}, uids, null, function (err) {});
-                    } else {
-                        channelServer.pushMessageByUids("onSys",
-                            {key: PushKey.JOIN_MAIN, data: res[0]}, uids, null, function (err) {
-                            });
-                    }
+        var password = exits.password;
+        if (password == passmd5) {
+            //密码正确
+            var sessionService = pomelo.app.get("sessionService");
+            var sess = sessionService.getByUid(exits.id);
+            if (!! sess) {//强制下线
+                sess.kick(exits.id, function(){});
+                session.bind(exits.id);
+                session.on('closed', onUserLeave.bind(null, self.app));
+                var channel = channelService.getChannel("fuwu1", true);
+                var sid = require('pomelo').app.getServerId();
+                channel.add(exits, sid);
+                var uids = [{uid : exits.id, sid : sid}];
+                if (exits.name == "") {
+                    //推送消息进入设置名称界面
+                    channelService.pushMessageByUids("onSys", {
+                        key : PushKey.SET_NAME
+                    }, uids, null, function (r) {});
                 } else {
-                    utils.invokeCallback(cb, null, {
-                        code : Code.PASSWORD_ERR,
-                        content : "密码错误！"
-                    })
+                    //进入游戏界面
+                    channelService.pushMessageByUids("onSys", {
+                        key : PushKey.JOIN_MAIN,
+                        data : exits
+                    }, uids, null, function(){});
                 }
             }
-        })
+        } else {
+            //密码错误
+            utils.invokeCallback(cb, null, {
+               code : Code.PASSWORD_ERR,
+               content : "密码错误！"
+            });
+        }
+        // var sql = "select * from user where account = ?";
+        // var args = [account];
+        // dbclient.query(sql, args, function (err, res) {
+        //     if (! err) {
+        //         res = res[0];
+        //         if (res.password == passmd5) {//密码正确，进入游戏
+        //             session.bind(res.id);
+        //             var uids = [{uid : account, sid : require('pomelo').app.getServerId()}];
+        //             if (res.name == "") {
+        //                 utils.invokeCallback(cb, null, {code : Code.OK, uid : res.id});
+        //                 // channelServer.pushMessageByUids("onSys",
+        //                 //     {key : PushKey.SET_NAME}, uids, null, function (err) {});
+        //             } else {
+        //                 channelServer.pushMessageByUids("onSys",
+        //                     {key: PushKey.JOIN_MAIN, data: res[0]}, uids, null, function (err) {
+        //                     });
+        //             }
+        //         } else {
+        //             utils.invokeCallback(cb, null, {
+        //                 code : Code.PASSWORD_ERR,
+        //                 content : "密码错误！"
+        //             })
+        //         }
+        //     }
+        // })
     }
 };
 
 //设置玩家名称
 UserDao.setUserName = function (uid, name, cb) {
-    if (! uid || ! name) {
-        utils.invokeCallback(cb, null, {
-            code : Code.FAIL,
-            content : "uid或者name不能为空！"
-        });
-        return;
-    }
     var sql = 'update user set name = ? where id = ?';
     var args = [name, uid];
-    pomelo.query(sql, args, function (err, res) {
+    dbclient.query(sql, args, function (err, res) {
         if (err) {
             console.log(err);
         } else {
-            sql = "select * from user where id=?";
-            pomelo.query(sql, [uid], function (err, s) {
+            sql = "select * from user where id = ?";
+            dbclient.query(sql, [uid], function (err, s) {
                 if (! err) {
                     var data = {
                         key : PushKey.UPDATE_USER_INFO,
-                        data : s
+                        data : s[0]
                     }
-                    UserDao.PushMsg(s[0].account, require("pomelo").app.getServerId(), data);
-                    UserDao.PushMsg(s[0].account, require("pomelo").app.getServerId(), {key : PushKey.JOIN_MAIN});
+                    UserDao.PushMsg(s[0].id, require("pomelo").app.getServerId(), data);
+                    UserDao.PushMsg(s[0].id, require("pomelo").app.getServerId(), {key : PushKey.JOIN_MAIN});
                 }
             })
         }
@@ -77,7 +102,7 @@ UserDao.setUserName = function (uid, name, cb) {
 //推送消息
 UserDao.PushMsg = function (uid, sid, msg) {
     var uids = [{uid : uid, sid : sid}];
-    channelServer.pushMessageByUids("onSys",
+    channelService.pushMessageByUids("onSys",
         msg, uids, null, function (err) {
         });
 }
@@ -85,10 +110,10 @@ UserDao.PushMsg = function (uid, sid, msg) {
 
 
 //玩家注册
-UserDao.Register = function (account, password, cb) {
+UserDao.Register = function (account, password, session, cb) {
     var sql = 'insert into user (account, password, name, lastlogintime, firstpartner) values (?, ?, ?, ?, ?)';
     var args = [account, md5(password), "", new Date(), 0];
-    pomelo.insert(sql, args, function (err, res) {
+    dbclient.insert(sql, args, function (err, res) {
         if (err) {
             console.log("玩家创建失败");
             console.log(err);
@@ -99,8 +124,10 @@ UserDao.Register = function (account, password, cb) {
                 content : "账号创建成功，请创建角色名称！",
                 uid : res.insertId,
             }
+            session.bind(res.insertId);
+            var channel = channelService.getChannel("fuwu1", true);
+            channel.add(res.insertId, pomelo.app.getServerId());
             utils.invokeCallback(cb, null, data);
-            // cb();
         }
     });
 
@@ -108,23 +135,19 @@ UserDao.Register = function (account, password, cb) {
 
 //查询是否已经注册
 UserDao.QueryUserExits = function (account, password, session, cb) {
-    if (! account || ! password) {
-        utils.invokeCallback(cb, null, {code : Code.FAIL, content : "参数有误！"});
-        return;
-    }
-    console.log(account, password);
+
     var sql = "select * from user where account = ?";
     var args = [account];
-    pomelo.query(sql, args, function (err, res) {
+    dbclient.query(sql, args, function (err, res) {
         if (err) {
             console.warn("err:UserData:QueryUserExits",err);
         } else {
             if (res.length == 0) {
                 console.log("不存在当前用户，可以注册");
-                UserDao.Register(account, password, cb);
+                UserDao.Register(account, password, session, cb);
             } else {
                 console.log("用户存在，直接登陆");
-                UserDao.Login(account, password, session, cb, true);
+                UserDao.Login(account, password, session, cb, res);
             }
         }
     });
@@ -134,14 +157,14 @@ UserDao.QueryUserExits = function (account, password, session, cb) {
 UserDao.upDatePartner = function (uid) {
     var sql = "select firstpartner from user where id = ?";
     var agrs = [uid];
-    pomelo.query(sql, agrs, function (err, res) {
+    dbclient.query(sql, agrs, function (err, res) {
         if (err) {
             console.log("err:UserData:upDatePartner", err);
         } else {
             if (res == 0) {
                 sql = "update user set firstpartner = ? where id = ?";
                 agrs = [1, uid];
-                pomelo.query(sql, agrs, function (err, res) {
+                dbclient.query(sql, agrs, function (err, res) {
                     if (err) {
                         console.log("err:UserData:upDatePartner-", err);
                     } else {
@@ -155,3 +178,19 @@ UserDao.upDatePartner = function (uid) {
         }
     })
 }
+
+/**
+ * User log out handler
+ *
+ * @param {Object} app current application
+ * @param {Object} session current session object
+ *
+ */
+var onUserLeave = function(app, session) {
+    if(!session || !session.uid) {
+        return;
+    }
+    console.log("to kick player");
+    // app.rpc.fight.roomRemote.kick(session, session.uid,app.get('serverId'), null);
+    // app.rpc.game.friendRemote.delInviteFriendMsg(session, session.uid,null);
+};

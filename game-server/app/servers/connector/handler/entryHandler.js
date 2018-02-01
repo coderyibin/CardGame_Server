@@ -31,16 +31,16 @@ Handler.prototype.login = function(msg, session, next) {
 	}
 	var account = msg.account;
 	var password = msg.password;
-	var sessionService = this.app.get("sessionService");
-	sessionService.kick(account, function () {});
+	// var sessionService = this.app.get("sessionService");
+	// sessionService.kick(account, function () {});
     // var ssion = sessionService.getByUid(account);
 	// if (!! ssion) {
 	// 	next(null, {code : Code.NONE, content : "您的账号已经在其他设备登录！"});
 	// 	return;
 	// }
     //将当前的session绑定一个uid
-    session.bind(account);
-	userDao.Login(account, password, session, next);
+    // session.bind(account);
+    userDao.Login(account, password, session, next);
 };
 
 //设置玩家名称
@@ -49,6 +49,8 @@ Handler.prototype.setName = function (msg, session, next) {
 	var name = msg.name;
 	if (!! uid && !! name) {
 		userDao.setUserName(uid, name, next);
+	} else {
+		next(null, {code : Code.FAIL, content : "玩家uid和名称不能为空"});
 	}
 }
 

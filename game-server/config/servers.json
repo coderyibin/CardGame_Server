@@ -1,24 +1,24 @@
 {
   "development":{
     "connector": [
-    {"id": "connector-server-1", "host": "192.168.1.8", "port": 3150, "clientHost": "192.168.1.8", "clientPort": 3010, "frontend": true}
+    {"id": "connector-server-1", "host": "127.0.0.1", "port": 3150, "clientHost": "127.0.0.1", "clientPort": 3010, "frontend": true}
     ]
     ,"gate": [
-    {"id": "gate-server-1", "host": "192.168.1.8", "port": 2010, "clientPort": 3016, "frontend": true}
+    {"id": "gate-server-1", "host": "127.0.0.1", "port": 2010, "clientPort": 3016, "frontend": true}
     ],
     "partner": [
-    {"id": "partner-server-1", "host": "192.168.1.8", "port": 2540, "clientPort": 2541}
+    {"id": "partner-server-1", "host": "127.0.0.1", "port": 2540, "clientPort": 2541}
     ]
   },
   "production":{
     "connector": [
-    {"id": "connector-server-1", "host": "192.168.1.8", "port": 3150, "clientHost": "192.168.1.8", "clientPort": 3010, "frontend": true}
+    {"id": "connector-server-1", "host": "127.0.0.1", "port": 3150, "clientHost": "127.0.0.1", "clientPort": 3010, "frontend": true}
     ],
     "gate": [
-    {"id": "gate-server-1", "host": "192.168.1.8", "port": 2010, "clientPort": 3016, "frontend": true}
+    {"id": "gate-server-1", "host": "127.0.0.1", "port": 2010, "clientPort": 3016, "frontend": true}
     ],
     "partner": [
-      {"id": "partner-server-1", "host": "192.168.1.8", "port": 2540, "clientPort": 2541}
+      {"id": "partner-server-1", "host": "127.0.0.1", "port": 2540, "clientPort": 2541}
     ]
   }
 }
