@@ -1,5 +1,5 @@
 var userDao = require("../../../dao/UserDao");
-var Code = require("../../../util/code")
+var Code = require("../../../util/code");
 
 module.exports = function(app) {
   return new Handler(app);
@@ -31,15 +31,6 @@ Handler.prototype.login = function(msg, session, next) {
 	}
 	var account = msg.account;
 	var password = msg.password;
-	// var sessionService = this.app.get("sessionService");
-	// sessionService.kick(account, function () {});
-    // var ssion = sessionService.getByUid(account);
-	// if (!! ssion) {
-	// 	next(null, {code : Code.NONE, content : "您的账号已经在其他设备登录！"});
-	// 	return;
-	// }
-    //将当前的session绑定一个uid
-    // session.bind(account);
     userDao.Login(account, password, session, next);
 };
 

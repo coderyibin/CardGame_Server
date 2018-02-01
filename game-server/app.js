@@ -5,8 +5,10 @@ var pomelo = require('pomelo');
  */
 var app = pomelo.createApp();
 app.set('name', 'CardGame_Server');
+var base = app.getBase();
 app.loadConfig("mysql", app.getBase() + "/config/mysql.json");//添加配置
-
+var serverId = app.getServerId();
+// require('pomelo-logger').configure( base + '/config/log4js.json' , {serverId: serverId, base: base} );
 
 
 app.configure('production|development', 'gate', function () {
@@ -15,7 +17,7 @@ app.configure('production|development', 'gate', function () {
         useProtobuf : true
     })
 })
-app.configure('production|development', 'partner', function () {
+app.configure('production|development', 'partner | testField', function () {
     app.set('connectorConfig', {
         connector: pomelo.connectors.hybridconnector,
         useProtobuf : true
