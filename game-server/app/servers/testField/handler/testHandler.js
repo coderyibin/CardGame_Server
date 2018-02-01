@@ -30,3 +30,8 @@ handler.getTestFieldInfo = function (msg, session, next) {
 
 	}
 }
+
+//进入试炼场
+handler.JoinTest = function (msg, session, next) {
+	
+}
