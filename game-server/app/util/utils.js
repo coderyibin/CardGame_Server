@@ -120,3 +120,10 @@ utils.splitToArr = function(str){
     }
     return arr;
 }
+
+utils.random = function (min, max) {
+    if (! max) {
+        return Math.floor(Math.random() + min);
+    }
+    return Math.floor(Math.random() * max + min);
+}

@@ -11,6 +11,9 @@
     ],
     "testField": [
     {"id": "testField-server-1", "host": "127.0.0.1", "port": 2542, "clientPort": 2543}
+    ],
+    "fight": [
+    {"id": "fight-server-1", "host": "127.0.0.1", "port": 2544, "clientPort": 2545}
     ]
   },
   "production":{
@@ -25,6 +28,9 @@
     ],
     "testField": [
       {"id": "testField-server-1", "host": "127.0.0.1", "port": 2542, "clientPort": 2543}
+    ],
+    "fight": [
+      {"id": "fight-server-1", "host": "127.0.0.1", "port": 2544, "clientPort": 2545}
     ]
   }
 }

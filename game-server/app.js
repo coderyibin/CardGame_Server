@@ -17,7 +17,7 @@ app.configure('production|development', 'gate', function () {
         useProtobuf : true
     })
 })
-app.configure('production|development', 'partner | testField', function () {
+app.configure('production|development', 'partner | testField | fight', function () {
     app.set('connectorConfig', {
         connector: pomelo.connectors.hybridconnector,
         useProtobuf : true
