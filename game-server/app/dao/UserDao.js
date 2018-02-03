@@ -61,7 +61,7 @@ UserDao.JoinMain = function (session, exits) {
 }
 
 //设置玩家名称
-UserDao.setUserName = function (uid, name, cb) {
+UserDao.setUserName = function (uid, name, session, cb) {
     var sql = 'update user set name = ? where id = ?';
     var args = [name, uid];
     dbclient.query(sql, args, function (err, res) {
@@ -71,12 +71,7 @@ UserDao.setUserName = function (uid, name, cb) {
             sql = "select * from user where id = ?";
             dbclient.query(sql, [uid], function (err, s) {
                 if (! err) {
-                    var data = {
-                        key : PushKey.UPDATE_USER_INFO,
-                        data : s[0]
-                    }
-                    UserDao.PushMsg(s[0].id, require("pomelo").app.getServerId(), data);
-                    UserDao.PushMsg(s[0].id, require("pomelo").app.getServerId(), {key : PushKey.JOIN_MAIN});
+                    UserDao.JoinMain(session, s[0]);
                 }
             })
         }

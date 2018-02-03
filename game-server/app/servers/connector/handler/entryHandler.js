@@ -39,7 +39,7 @@ Handler.prototype.setName = function (msg, session, next) {
 	var uid = msg.uid;
 	var name = msg.name;
 	if (!! uid && !! name) {
-		userDao.setUserName(uid, name, next);
+		userDao.setUserName(uid, name, session, next);
 	} else {
 		next(null, {code : Code.FAIL, content : "玩家uid和名称不能为空"});
 	}
