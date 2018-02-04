@@ -91,9 +91,9 @@ UserDao.PushMsg = function (uid, sid, msg) {
 
 //玩家注册
 UserDao.Register = function (account, password, session, cb) {
-    var sql = 'insert into user (account, password, name, lastlogintime, firstpartner, att, def, att_bouns, def_penetrate) ' +
-        'values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    var args = [account, md5(password), "", new Date(), 0, Config.player.Base_Att, Config.player.Base_Def, Config.player.Base_Att_Bouns, Config.player.Base_Def_Penetrate];
+    var sql = 'insert into user (account, password, name, lastlogintime, firstpartner, att, def, att_bouns, def_penetrate, agile) ' +
+        'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    var args = [account, md5(password), "", new Date(), 0, Config.player.Base_Att, Config.player.Base_Def, Config.player.Base_Att_Bouns, Config.player.Base_Def_Penetrate, 10];
     dbclient.insert(sql, args, function (err, res) {
         if (err) {
             console.log("玩家创建失败");

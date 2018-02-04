@@ -37,3 +37,29 @@ Fight.QuickFight = function (monsters, users, cb) {
         monster : monsters
     });
 }
+
+//自动战斗
+Fight.reqAutoFight = function (att, tar) {
+    var f = [];
+    for (var i = 0; i < att.length; i ++) {
+        var index = utils.random(tar.length);
+        var subHp = att[i].att - tar[index].def;
+        tar[index].hp -= subHp;
+        var die = false;
+        if (tar[index].hp <= 0) {
+            tar.splice(index, 1);
+            die = true;
+        }
+        f.push({
+            attId : att[i].id,
+            attTag : tar[index].id,
+            sub : subHp,
+            die : die
+        });
+    }
+    return {
+        data : f,
+        att : att,
+        tar : tar
+    };
+}
