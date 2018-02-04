@@ -20,8 +20,8 @@ PartnerDao.getPartner = function (uid, cb) {
                 dbclient.query(sql, [], function (err, res) {
                     //获取随从表属于玩家第一只随从的id
                     if (! err) {
-                        sql = "insert into user_partner (partnerId, userId, level, equipment) values (?, ?, ? ,?)";
-                        args = [res[0].id, uid, 1, "{}"];
+                        sql = "insert into user_partner (partnerId, userId, level, equipment, fight) values (?, ?, ? , ?, ?)";
+                        args = [res[0].id, uid, 1, "{}", 1];
                         dbclient.query(sql, args, function (err, insert) {
                             if (! err) {
                                 //更新玩家数据

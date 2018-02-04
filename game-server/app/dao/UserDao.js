@@ -5,6 +5,7 @@ var md5 = require("MD5");
 var Code = require("../util/code");
 var PushKey = require("../util/pushKey");
 var channelService = require("pomelo").app.get("channelService");
+var Config = require("../util/config");
 var UserDao = module.exports;
 
 //玩家登陆
@@ -90,8 +91,9 @@ UserDao.PushMsg = function (uid, sid, msg) {
 
 //玩家注册
 UserDao.Register = function (account, password, session, cb) {
-    var sql = 'insert into user (account, password, name, lastlogintime, firstpartner) values (?, ?, ?, ?, ?)';
-    var args = [account, md5(password), "", new Date(), 0];
+    var sql = 'insert into user (account, password, name, lastlogintime, firstpartner, att, def, att_bouns, def_penetrate) ' +
+        'values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    var args = [account, md5(password), "", new Date(), 0, Config.player.Base_Att, Config.player.Base_Def, Config.player.Base_Att_Bouns, Config.player.Base_Def_Penetrate];
     dbclient.insert(sql, args, function (err, res) {
         if (err) {
             console.log("玩家创建失败");

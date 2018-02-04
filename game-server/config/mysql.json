@@ -1,6 +1,6 @@
 {
   "development": {
-    "host" : "192.168.1.10",
+    "host" : "www.tianyaso.com",
     "port" : "3306",
     "database" : "cardgame",
     "user" : "root",
@@ -8,7 +8,7 @@
   },
 
   "production": {
-    "host" : "192.168.1.10",
+    "host" : "www.tianyaso.com",
     "port" : "3306",
     "database" : "cardgame",
     "user" : "root",

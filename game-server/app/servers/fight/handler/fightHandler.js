@@ -26,19 +26,33 @@ fight.startFight = function (msg, session, next) {
                     args = [];
                     dbclient.query(sql, args, function (err, monster) {
                         if (! err) {
-                            monster = monster;
-                            sql = "select * from user_partner where fight = 1 and userId = ?";
+                            for (var i in monster) {
+                                monster[i]["camp"] = "monster"
+                            }
+                            // sql = "select * from user_partner where fight = 1 and userId = ?";
+                            sql = "select b.id, a.name, a.att, a.def, a.hp, a.mp, b.level " +
+                                "from partner a inner join user_partner b on a.id = b.partnerId and b.fight = 1";
                             args = [session.uid];
                             dbclient.query(sql, args, function (err, partner) {
                                 if (! err) {
-                                    partner = partner;
+                                    var u_data = [];
+                                    for (var i in partner) {
+                                        u_data.push({
+                                            id : partner[i].id,
+                                            name : partner[i].name,
+                                            def : partner[i].def,
+                                            hp : partner[i].hp,
+                                            mp : partner[i].mp,
+                                            level : partner[i].level,
+                                            camp : "user",
+                                            att : partner[i].att
+                                        })
+                                    }
                                     //返回玩家对阵数据
                                     next(null, {
                                         code : Code.OK,
-                                        data : {
-                                            monsters : monster,
-                                            users : partner
-                                        }
+                                        monsters : monster,
+                                        users : u_data
                                     });
                                     //快速战斗计算
                                     // FightCtrl.QuickFight(monster, partner, function (data) {
