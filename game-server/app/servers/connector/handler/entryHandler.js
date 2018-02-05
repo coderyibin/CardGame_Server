@@ -45,6 +45,11 @@ Handler.prototype.setName = function (msg, session, next) {
 	}
 }
 
+//玩家升级
+Handler.UpLevel = function (msg, session, next) {
+    
+}
+
 /**
  * Publish route for mqtt connector.
  *

@@ -1,6 +1,8 @@
 var utils = require("../../../util/utils");
 
 var Fight = module.exports;
+Fight.FightUsers = null;
+Fight.FightMonster = null;
 
 Fight.fightIng = function (monster, users, cb) {
 
@@ -42,7 +44,7 @@ Fight.QuickFight = function (monsters, users, cb) {
 Fight.reqAutoFight = function (att, tar) {
     var f = [];
     for (var i = 0; i < att.length; i ++) {
-        var index = utils.random(tar.length);
+        var index = utils.random(tar.length - 1);
         var subHp = att[i].att - tar[index].def;
         tar[index].hp -= subHp;
         var die = false;
@@ -52,13 +54,15 @@ Fight.reqAutoFight = function (att, tar) {
         }
         f.push({
             attId : att[i].id,
+            attName : att[i].name,
             attTag : tar[index].id,
+            tarName : tar[index].name,
             sub : subHp,
             die : die
         });
     }
     return {
-        data : f,
+        f : f,
         att : att,
         tar : tar
     };

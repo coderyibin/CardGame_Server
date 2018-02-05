@@ -34,7 +34,7 @@ fight.startFight = function (msg, session, next) {
                                 monster[i]["camp"] = "monster"
                                 monsterAgiel += monster[i].agile;
                             }
-                            this._oFightMonsters = monster;
+                            FightCtrl.FightMonster = monster;
                             // sql = "select * from user_partner where fight = 1 and userId = ?";
                             sql = "select b.id, a.name, a.att, a.def, a.hp, a.mp, b.level, a.agile " +
                                 "from partner a inner join user_partner b on a.id = b.partnerId and b.fight = 1";
@@ -51,12 +51,13 @@ fight.startFight = function (msg, session, next) {
                                             hp : partner[i].hp,
                                             mp : partner[i].mp,
                                             level : partner[i].level,
+                                            agile : partner[i].agile,
                                             camp : "user",
                                             att : partner[i].att
                                         });
                                         userAgile += partner[i].agile;
                                     }
-                                    this._oFightUsers = u_data;
+                                    FightCtrl.FightUsers = u_data;
                                     //返回玩家对阵数据
                                     next(null, {
                                         code : Code.OK,
@@ -94,11 +95,10 @@ fight.reqFight = function (msg, session, next) {
     if (!! attId) {//手动战斗
 
     } else {//自动战斗
-        var users = this._oFightUsers;
+        var users = FightCtrl.FightUsers;
         var userAgile = 0;
         var monsterAgile = 0;
-        var monsters = this._oFightMonsters;
-        console.log(users)
+        var monsters = FightCtrl.FightMonster;
         for (var i = 0; i < users.length; i ++) {
             userAgile += users[i].agile;
         }
@@ -106,23 +106,6 @@ fight.reqFight = function (msg, session, next) {
             monsterAgile += monsters[i].agile;
         }
         if (monsterAgile > userAgile) {//敌方优先动手
-            // var f = [];
-            // for (var i = 0; i < monsters.length; i ++) {
-            //     var index = util.random(users.length);
-            //     var subHp = monsters[i].att - users[index].def;
-            //     users[index].hp -= subHp;
-            //     var die = false;
-            //     if (users[index].hp <= 0) {
-            //         users.splice(index, 1);
-            //         die = true;
-            //     }
-            //     f.push({
-            //         attId : monsters[i].id,
-            //         attTag : users[index].id,
-            //         sub : subHp,
-            //         die : die
-            //     })
-            // }
             var data = FightCtrl.reqAutoFight(monsters, users);
             monsters = data.att;
             users = data.tar;
@@ -130,16 +113,30 @@ fight.reqFight = function (msg, session, next) {
             data = FightCtrl.reqAutoFight(users, monsters);
             users = data.att;
             monsters = data.tar;
-            f.concat(data.f);
+            f = f.concat(data.f);
             next(null, {
                 code : Code.OK,
-                data : f
+                data : f,
+                first : "monster"//阵营先
             });
+            FightCtrl.FightMonster = monsters;
+            FightCtrl.FightUsers = users;
         } else {
+            var data = FightCtrl.reqAutoFight(users, monsters);
+            users = data.att;
+            monsters = data.tar;
+            var f = data.f;
+            data = FightCtrl.reqAutoFight(monsters, users);
+            monsters = data.att;
+            users = data.tar;
+            f = f.concat(data.f);
             next(null, {
                 code : Code.OK,
-                data : ""
+                data : f,
+                first : "user"//阵营先
             });
+            FightCtrl.FightMonster = monsters;
+            FightCtrl.FightUsers = users;
         }
     }
 }
