@@ -1,5 +1,6 @@
 var userDao = require("../../../dao/UserDao");
 var Code = require("../../../util/code");
+var db = require('../../../dao/dbClient');
 
 module.exports = function(app) {
   return new Handler(app);
@@ -46,8 +47,18 @@ Handler.prototype.setName = function (msg, session, next) {
 }
 
 //玩家升级
-Handler.UpLevel = function (msg, session, next) {
+Handler.prototype.UpLevel = function (msg, session, next) {
     
+}
+
+//获取服务器列表
+Handler.prototype.getServer = function (msg, session, next) {
+	db.getServerList(function (msg) {
+		next(null, {
+			code : Code.OK,
+			list : msg
+		});
+    }.bind(this))
 }
 
 /**

@@ -1,0 +1,31 @@
+//玩家角色表
+CREATE table game_role(
+  id int auto_increment PRIMARY key COMMENT "角色id，自增长",
+  nickName varchar(50) NOT NULL COMMENT "角色名称",
+  sex int(2) Not null COMMENT "角色性别",
+  userId INT(4) not null COMMENT "角色所属用户id",
+  hp INT(4) not null COMMENT "血量",
+  mp INT(4) not null COMMENT "魔量",
+  strength INT(4) not null COMMENT "力量",
+  wakan int(4) not null COMMENT "灵力",
+  agile INT(4) not NULL COMMENT "敏捷",
+  equipment VARCHAR(255)not null COMMENT "角色装备",
+  Armor  INT(4)not null COMMENT "角色护甲值"
+  firstId  INT(4)not null COMMENT "第一只随从id"
+)comment='玩家角色表'
+
+//alter table game_role add firstId int(4) not Null comment "第一只随从id"
+//账号表
+CREATE table game_user(
+  id int(4) auto_increment PRIMARY key COMMENT "角色id，自增长",
+  account varchar(255) not null comment "账号",
+  password varchar(255) not null comment "密码",
+  lastLoginTime datetime not null comment "上次登录时间"
+)
+//游戏服务器表
+CREATE table game_server(
+  id int(4) auto_increment PRIMARY key COMMENT "服务器id，自增长",
+  name varchar(255) not null comment "服务器名称",
+  count int(4) not null comment "服务器玩家数量"
+)comment="服务器表"
+insert into game_server (name, count) values ('福建区', 0)
