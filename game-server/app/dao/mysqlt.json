@@ -3,6 +3,7 @@ CREATE table game_role(
   id int auto_increment PRIMARY key COMMENT "角色id，自增长",
   nickName varchar(50) NOT NULL COMMENT "角色名称",
   sex int(2) Not null COMMENT "角色性别",
+  level int(4) Not null COMMENT "角色等级",
   userId INT(4) not null COMMENT "角色所属用户id",
   hp INT(4) not null COMMENT "血量",
   mp INT(4) not null COMMENT "魔量",
@@ -29,3 +30,29 @@ CREATE table game_server(
   count int(4) not null comment "服务器玩家数量"
 )comment="服务器表"
 insert into game_server (name, count) values ('福建区', 0)
+//怪物表
+CREATE table game_monster(
+id int(4) auto_increment PRIMARY key COMMENT "id，自增长",
+name varchar(255) not null comment "怪物名称",
+hp INT(4) not null COMMENT "血量",
+mp INT(4) not null COMMENT "魔量",
+strength INT(4) not null COMMENT "力量",
+wakan int(4) not null COMMENT "灵力",
+agile INT(4) not NULL COMMENT "敏捷",
+armor  INT(4)not null COMMENT "护甲值"
+)comment="怪物表"
+//insert into game_server (name, hp, mp, strength, wakan, agile, Armor) values ('猫妖', 100, 10, 10, 2, 1, 7)
+
+//随从表
+CREATE table game_partner(
+id int(4) auto_increment PRIMARY key COMMENT "id，自增长",
+name varchar(255) not null comment "名称",
+level int(4) Not null COMMENT "等级",
+hp INT(4) not null COMMENT "血量",
+mp INT(4) not null COMMENT "魔量",
+strength INT(4) not null COMMENT "力量",
+wakan int(4) not null COMMENT "灵力",
+agile INT(4) not NULL COMMENT "敏捷",
+equipment VARCHAR(255)not null COMMENT "装备",
+Armor  INT(4)not null COMMENT "护甲值"
+)comment="随从表"

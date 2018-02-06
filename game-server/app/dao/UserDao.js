@@ -25,7 +25,26 @@ UserDao.Login = function (account, password, session, cb, exits) {
             if (!! sess) {//强制下线
                 sess.kick(exits.id, function(){});
             }
-            UserDao.JoinMain(session, exits);
+            db.getPlayerRole(exits.id, function (msg) {
+                if (msg.length == 0) {//玩家未创建角色，前往创建
+                    console.log("玩家未创建角色，前往创建");
+                    utils.invokeCallback(cb, null, {
+                        code : Code.OK,
+                        create : false,
+                        uid : exits.id
+                    });
+                    var sid = require('pomelo').app.getServerId();
+                    //推送消息进入设置名称界面
+                    channelService.pushMessageByUids("onSys", {
+                        key : PushKey.SET_NAME
+                    }, [{uid : exits.id, sid : sid}], null, function () {});
+                } else {
+                    utils.invokeCallback(cb, null, {
+                        code : Code.OK
+                    })
+                    UserDao.JoinGame(session, msg[0]);
+                }
+            })
         } else {
             //密码错误
             utils.invokeCallback(cb, null, {
@@ -36,8 +55,29 @@ UserDao.Login = function (account, password, session, cb, exits) {
     }
 };
 
+//登录成功后进去游戏
+UserDao.JoinGame = function (session, userInfo) {
+    session.bind(userInfo.id);
+    session.on('closed', onUserLeave.bind(null, self.app));
+    var channel = channelService.getChannel("fuwu1", true);
+    var sid = require('pomelo').app.getServerId();
+    channel.add(userInfo.id, sid);
+    var uids = [{uid : userInfo.id, sid : sid}];
+    //进入游戏界面
+    channelService.pushMessageByUids("onSys", {
+        key : PushKey.JOIN_MAIN,
+    }, uids, null, function(){});
+    //推送玩家数据
+    channelService.pushMessageByUids("onSys", {
+        key : PushKey.UPDATE_USER_INFO,
+        data : userInfo
+    }, uids, null, function(){});
+    UserDao.UserInfo = userInfo;
+}
+
 //登录成功进去游戏主界面
 UserDao.JoinMain = function (session, exits) {
+    console.log(exits);
     var self = this;
     session.bind(exits.id);
     session.on('closed', onUserLeave.bind(null, self.app));
@@ -66,20 +106,29 @@ UserDao.JoinMain = function (session, exits) {
 
 //设置玩家名称
 UserDao.setUserName = function (uid, name, session, cb) {
-    var sql = 'update user set name = ? where id = ?';
-    var args = [name, uid];
-    dbclient.query(sql, args, function (err, res) {
-        if (err) {
-            console.log(err);
-        } else {
-            sql = "select * from user where id = ?";
-            dbclient.query(sql, [uid], function (err, s) {
-                if (! err) {
-                    UserDao.JoinMain(session, s[0]);
-                }
+    // var sql = 'update game_user set name = ? where id = ?';
+    // var args = [name, uid];
+    // dbclient.query(sql, args, function (err, res) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         sql = "select * from game_user where id = ?";
+    //         dbclient.query(sql, [uid], function (err, s) {
+    //             if (! err) {
+    //                 UserDao.JoinMain(session, s[0]);
+    //             }
+    //         })
+    //     }
+    // })
+    db.updateUserName(uid, name, function (msg) {
+        if (UserDao.UserInfo == null) {
+            db.getUserInfo(uid, function (msg) {
+                UserDao.JoinMain(session, msg[0]);
             })
+        } else {
+            UserDao.JoinMain(session, UserDao.UserInfo);
         }
-    })
+    });
 }
 
 //推送消息

@@ -5,7 +5,12 @@ config.player = {
     Base_Def : 8,//基础防御
     Base_Att_Bouns : 0.00,//基础的攻击加成
     Base_Def_Penetrate : 0,//基础防御穿透
-    Base_Hp : 1000,
+    Base_Hp : 500,
+    Base_Mp : 50,
+    Base_Strength : 50,
+    Base_Wakan : 20,
+    Base_Agile : 10,
+    Base_Armor : 30,
     Base_Mp : 50,
     Base_HB : 0.8,//血量计算的基础数值
     Base_MB : 0.3//魔法计算的基础数值
