@@ -1,6 +1,7 @@
 var userDao = require("../../../dao/UserDao");
 var Code = require("../../../util/code");
 var db = require('../../../dao/dbClient');
+var PushKey = require("../../../util/pushKey");
 
 module.exports = function(app) {
   return new Handler(app);
@@ -8,6 +9,7 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
+  this.channelService = require("pomelo").app.get("channelService");
 };
 
 /**
@@ -46,6 +48,37 @@ Handler.prototype.setName = function (msg, session, next) {
 	}
 }
 
+//创建角色
+Handler.prototype.createRole = function (msg, session) {
+	var uid = msg.uid;
+	var name = msg.name;
+	var self = this;
+	if (!! uid && !! name) {
+		userDao.CreateRole(uid, name, function (msg) {
+			console.log(msg);
+			var rid = msg.rid;
+			var sid = self.app.getServerId();
+			session.bind(rid);
+            session.on('closed', onUserLeave.bind(null, self.app));
+			var channel = self.channelService.getChannel(sid, true);
+			console.log(rid, sid);
+            channel.add(rid, sid);
+            var uids = [{uid : rid, sid : sid}];
+            //进入游戏界面
+            self.channelService.pushMessageByUids("onSys", {
+                key : PushKey.JOIN_MAIN,
+            }, uids, null, function(){});
+            //推送玩家数据
+            self.channelService.pushMessageByUids("onSys", {
+                key : PushKey.UPDATE_USER_INFO,
+                data : msg
+            }, uids, null, function(){})
+        });
+	} else {
+		console.warn("参数错误");
+	}
+}
+
 //玩家升级
 Handler.prototype.UpLevel = function (msg, session, next) {
     
@@ -76,6 +109,23 @@ Handler.prototype.publish = function(msg, session, next) {
 	};
   next(null, result);
 };
+
+/**
+ * User log out handler
+ *
+ * @param {Object} app current application
+ * @param {Object} session current session object
+ *
+ */
+var onUserLeave = function(app, session) {
+    if(!session || !session.uid) {
+        return;
+    }
+    console.log("to kick player");
+    // app.rpc.fight.roomRemote.kick(session, session.uid,app.get('serverId'), null);
+    // app.rpc.game.friendRemote.delInviteFriendMsg(session, session.uid,null);
+};
+
 
 /**
  * Subscribe route for mqtt connector.

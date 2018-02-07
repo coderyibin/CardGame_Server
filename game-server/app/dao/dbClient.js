@@ -56,14 +56,30 @@ db.getPlayerRole = function (uid, cb) {
     }, "getPlayerRole");
 }
 
-db.updateUserName = function (uid, name, cb) {
+db.createRole = function (uid, name, cb) {
+    var hp = Config.player.Base_Hp;
+    var mp = Config.player.Base_MB;
+    var strength = Config.player.Base_Strength;
+    var wakan = Config.player.Base_Wakan;
+    var agile = Config.player.Base_Agile;
+    var armor = Config.player.Base_Armor;
     var sql = "insert into game_role (nickName, sex, userId, hp, mp, strength, wakan, agile, equipment, armor, firstId) values " +
         "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    var args = [name, 0, uid, Config.player.Base_Hp, Config.player.Base_MB, Config.player
-        .Base_Strength, Config.player.Base_Wakan, Config.player.Base_Agile, "{}", Config.player.Base_Armor, 0];
+    var args = [name, 0, uid, hp, mp, strength, wakan, agile, "{}", armor, 0];
     db._mysqlQuery(sql, args, function (msg) {
-
-        cb(msg);
+        var _data = {
+            rid : msg.insertId,
+            nickName : name,
+            sex : 0,
+            uid : uid,
+            hp : hp,
+            mp : mp,
+            strength : strength,
+            wakan : wakan,
+            agile : agile,
+            armor : armor,
+        }
+        cb(_data);
     }, "updateUserName");
 }
 

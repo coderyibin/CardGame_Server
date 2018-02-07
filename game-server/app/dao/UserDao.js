@@ -55,14 +55,25 @@ UserDao.Login = function (account, password, session, cb, exits) {
     }
 };
 
+UserDao.CreateRole = function (uid, name, cb) {
+    // db.createRole(uid, name, function (msg) {
+        // UserDao.JoinGame(session, msg);
+    // });
+    db.createRole(uid, name, function (msg) {
+        UserDao.UserInfo = msg;//角色信息
+        cb(msg);
+    });
+}
+
 //登录成功后进去游戏
 UserDao.JoinGame = function (session, userInfo) {
-    session.bind(userInfo.id);
+    var rid = userInfo.rid;
+    session.bind(rid);//绑定角色id
     session.on('closed', onUserLeave.bind(null, self.app));
     var channel = channelService.getChannel("fuwu1", true);
     var sid = require('pomelo').app.getServerId();
-    channel.add(userInfo.id, sid);
-    var uids = [{uid : userInfo.id, sid : sid}];
+    channel.add(rid, sid);
+    var uids = [{uid : rid, sid : sid}];
     //进入游戏界面
     channelService.pushMessageByUids("onSys", {
         key : PushKey.JOIN_MAIN,
@@ -72,7 +83,7 @@ UserDao.JoinGame = function (session, userInfo) {
         key : PushKey.UPDATE_USER_INFO,
         data : userInfo
     }, uids, null, function(){});
-    UserDao.UserInfo = userInfo;
+    UserDao.UserInfo = userInfo;//角色信息
 }
 
 //登录成功进去游戏主界面
