@@ -49,7 +49,7 @@ db.getUserInfo = function (uid, cb) {
 }
 //获取玩家角色
 db.getPlayerRole = function (uid, cb) {
-    var sql = "select * from game_role where id = ?";
+    var sql = "select * from game_role where userId = ?";
     var args = [uid];
     db._mysqlQuery(sql, args, function (msg) {
         cb(msg);
@@ -92,6 +92,14 @@ db.getServerList = function (cb) {
         } else {
             cb(res);
         }
+    })
+}
+
+db.getIsFirstPartner = function (rid, cb) {
+    var sql = "select first from game_role where id = ?";
+    var args = [rid];
+    dbclient.query(sql, args, function (msg) {
+        cb(msg[0]);
     })
 }
 

@@ -13,6 +13,17 @@ UserDao.UserInfo = null;
 //玩家登陆
 UserDao.Login = function (account, password, session, cb, exits) {
 
+    // this.QueryUserExits(account, password, function (exits) {
+    //     if (! exits) {
+    //         //前往注册
+    //         UserDao.Register(account, password, function (uid) {
+    //             cb({uid : uid, key : PushKey.SET_NAME});
+    //         });
+    //     } else {
+    //         //前往判断是否有角色，是否需要创建角色
+    //
+    //     }
+    // });
     if (! exits) {
         this.QueryUserExits(account, password, session, cb);
     } else {
@@ -25,6 +36,7 @@ UserDao.Login = function (account, password, session, cb, exits) {
             if (!! sess) {//强制下线
                 sess.kick(exits.id, function(){});
             }
+            var sid = require('pomelo').app.getServerId();
             db.getPlayerRole(exits.id, function (msg) {
                 if (msg.length == 0) {//玩家未创建角色，前往创建
                     console.log("玩家未创建角色，前往创建");
@@ -33,7 +45,6 @@ UserDao.Login = function (account, password, session, cb, exits) {
                         create : false,
                         uid : exits.id
                     });
-                    var sid = require('pomelo').app.getServerId();
                     //推送消息进入设置名称界面
                     channelService.pushMessageByUids("onSys", {
                         key : PushKey.SET_NAME
@@ -42,7 +53,22 @@ UserDao.Login = function (account, password, session, cb, exits) {
                     utils.invokeCallback(cb, null, {
                         code : Code.OK
                     })
-                    UserDao.JoinGame(session, msg[0]);
+                    var rid = msg[0].rid;
+                    session.bind(rid);//绑定角色id
+                    session.on('closed', onUserLeave.bind(null, this.app));
+                    var channel = channelService.getChannel(sid, true);
+                    channel.add(rid, sid);
+                    // UserDao.JoinGame(session, msg[0]);
+                    //推送消息进入设置名称界面
+                    channelService.pushMessageByUids("onSys", {
+                        key : PushKey.JOIN_MAIN
+                    }, [{uid : rid, sid : sid}], null, function () {});
+                    //推送玩家数据
+                    channelService.pushMessageByUids("onSys", {
+                        key : PushKey.UPDATE_USER_INFO,
+                        data : msg[0]
+                    }, [{uid : rid, sid : sid}], null, function(){});
+                    UserDao.UserInfo = msg[0];//角色信息
                 }
             })
         } else {
@@ -69,9 +95,9 @@ UserDao.CreateRole = function (uid, name, cb) {
 UserDao.JoinGame = function (session, userInfo) {
     var rid = userInfo.rid;
     session.bind(rid);//绑定角色id
-    session.on('closed', onUserLeave.bind(null, self.app));
-    var channel = channelService.getChannel("fuwu1", true);
+    session.on('closed', onUserLeave.bind(null, this.app));
     var sid = require('pomelo').app.getServerId();
+    var channel = channelService.getChannel(sid, true);
     channel.add(rid, sid);
     var uids = [{uid : rid, sid : sid}];
     //进入游戏界面
@@ -115,33 +141,6 @@ UserDao.JoinMain = function (session, exits) {
     }
 }
 
-//设置玩家名称
-UserDao.setUserName = function (uid, name, session, cb) {
-    // var sql = 'update game_user set name = ? where id = ?';
-    // var args = [name, uid];
-    // dbclient.query(sql, args, function (err, res) {
-    //     if (err) {
-    //         console.log(err);
-    //     } else {
-    //         sql = "select * from game_user where id = ?";
-    //         dbclient.query(sql, [uid], function (err, s) {
-    //             if (! err) {
-    //                 UserDao.JoinMain(session, s[0]);
-    //             }
-    //         })
-    //     }
-    // })
-    db.updateUserName(uid, name, function (msg) {
-        if (UserDao.UserInfo == null) {
-            db.getUserInfo(uid, function (msg) {
-                UserDao.JoinMain(session, msg[0]);
-            })
-        } else {
-            UserDao.JoinMain(session, UserDao.UserInfo);
-        }
-    });
-}
-
 //推送消息
 UserDao.PushMsg = function (uid, sid, msg) {
     var uids = [{uid : uid, sid : sid}];
@@ -154,27 +153,6 @@ UserDao.PushMsg = function (uid, sid, msg) {
 
 //玩家注册
 UserDao.Register = function (account, password, session, cb) {
-    // var sql = 'insert into user (account, password, name, lastlogintime, firstpartner, att, def, att_bouns, def_penetrate, agile, hp, mp) ' +
-    //     'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    // var args = [account, md5(password), "", new Date(), 0, Config.player.Base_Att, Config.player.Base_Def, Config.player.Base_Att_Bouns,
-    //     Config.player.Base_Hp, Config.player.Base_Mp, Config.player.Base_Def_Penetrate, 10];
-    // dbclient.insert(sql, args, function (err, res) {
-    //     if (err) {
-    //         console.log("玩家创建失败");
-    //         console.log(err);
-    //     } else {
-    //         console.log("玩家创建成功");
-    //         var data = {
-    //             code : 200,
-    //             content : "账号创建成功，请创建角色名称！",
-    //             uid : res.insertId,
-    //         }
-    //         session.bind(res.insertId);
-    //         var channel = channelService.getChannel("fuwu1", true);
-    //         channel.add(res.insertId, pomelo.app.getServerId());
-    //         utils.invokeCallback(cb, null, data);
-    //     }
-    // });
     db.insertUserData({
         account : account,
         password : password
@@ -194,28 +172,13 @@ UserDao.Register = function (account, password, session, cb) {
 
 //查询是否已经注册
 UserDao.QueryUserExits = function (account, password, session, cb) {
-
-    // var sql = "select * from user where account = ?";
-    // var args = [account];
-    // dbclient.query(sql, args, function (err, res) {
-    //     if (err) {
-    //         console.warn("err:UserData:QueryUserExits",err);
-    //     } else {
-    //         if (res.length == 0) {
-    //             console.log("不存在当前用户，可以注册");
-    //             UserDao.Register(account, password, session, cb);
-    //         } else {
-    //             console.log("用户存在，直接登陆");
-    //             UserDao.Login(account, password, session, cb, res[0]);
-    //         }
-    //     }
-    // });
     db.exitsUser({
         account : account
     }, function (msg) {
         if (msg.length == 0) {
             console.log("不存在当前用户，可以注册");
             UserDao.Register(account, password, session, cb);
+            // cb(false);
         } else {
             console.log("用户存在，直接登陆");
             UserDao.Login(account, password, session, cb, msg[0]);

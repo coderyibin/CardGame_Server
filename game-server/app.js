@@ -1,5 +1,5 @@
 var pomelo = require('pomelo');
-
+var routeUtil = require("./app/util/routeUtil");
 /**
  * Init app for client.
  */
@@ -39,6 +39,7 @@ app.configure('production|development', 'connector', function(){
 app.configure('production|development', function() {
     var dbclient = require('./app/dao/mysql/mysql.js').init(app);
     app.set('dbclient', dbclient);
+    // app.route('fight', routeUtil.fight);
     // app.route('fight', routeUtil.fight);//被踢下线原因注释
     // app.route('connector', routeUtil.connector);
     // app.filter(pomelo.timeout());

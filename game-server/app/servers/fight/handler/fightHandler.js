@@ -16,6 +16,7 @@ var fightHandler = function (app) {
 var fight = fightHandler.prototype;
 
 fight.startFight = function (msg, session, next) {
+    return
     var mapId  = msg.mapId;
     if (!! mapId) {
         var sql = "select firstpartner from user where id = ?";
