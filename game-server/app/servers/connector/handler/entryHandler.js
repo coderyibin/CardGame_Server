@@ -91,12 +91,12 @@ Handler.prototype.createRole = function (msg, session) {
 	}
 }
 
-//获取玩家第一只随从
-Handler.prototype.getFirstPartner = function (msg, session, next) {
-	db.getIsFirstPartner(12, function (msg) {
-		console.log(msg)
-    })
-}
+// //获取玩家第一只随从
+// Handler.prototype.getFirstPartner = function (msg, session, next) {
+// 	db.getIsFirstPartner(12, function (msg) {
+//         console.log(msg)
+//     })
+// }
 
 //玩家升级
 Handler.prototype.UpLevel = function (msg, session, next) {

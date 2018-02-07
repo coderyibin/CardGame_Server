@@ -96,11 +96,22 @@ db.getServerList = function (cb) {
 }
 
 db.getIsFirstPartner = function (rid, cb) {
-    var sql = "select first from game_role where id = ?";
+    var sql = "select firstId from game_role where id = ?";
     var args = [rid];
-    dbclient.query(sql, args, function (msg) {
-        cb(msg[0]);
+    dbclient.query(sql, args, function (err, msg) {
+        if (err) {
+            console.warn("db:getIsFirstPartner:", err);
+        } else {
+            cb(msg[0]);
+        }
     })
+}
+
+//获取关卡怪物
+db.getCheckPointMonster = function (map, cb) {
+    var sql = "select * from game_monster";
+    var args = [];
+    db._mysqlQuery(sql, args, cb, "getCheckPointMonster");
 }
 
 db._mysqlQuery = function (sql, args, cb, fname) {

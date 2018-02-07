@@ -2,6 +2,7 @@ var Code = require("../../../util/code");
 var dbclient = require('pomelo').app.get("dbclient");
 var FightCtrl = require("./FightCtrl");
 var util = require("../../../util/utils");
+var db = require('../../../dao/dbClient');
 
 module.exports = function (app) {
     return new fightHandler(app);
@@ -16,72 +17,84 @@ var fightHandler = function (app) {
 var fight = fightHandler.prototype;
 
 fight.startFight = function (msg, session, next) {
-    return
     var mapId  = msg.mapId;
-    if (!! mapId) {
-        var sql = "select firstpartner from user where id = ?";
-        var args = [session.uid];
-        dbclient.query(sql, args, function (err, first) {
-            if (err) {
-                console.warn(err)
+    var rid = msg.rid;
+    if (!! mapId && rid) {
+        db.getIsFirstPartner(rid, function (msg) {
+            if (msg.firstid == 0) {//没有随从，不可进试炼场
+                next(null, {
+                    code : Code.PARTNER.NONE,
+                    content : "没有随从，不能进试炼场"
+                });
             } else {
-                if (first[0].firstpartner != 0) {
-                    sql = "select * from monster where checkpoint = 1";
-                    args = [];
-                    dbclient.query(sql, args, function (err, monster) {
-                        if (! err) {
-                            var monsterAgiel = 0;//敌方先手值
-                            for (var i in monster) {
-                                monster[i]["camp"] = "monster"
-                                monsterAgiel += monster[i].agile;
-                            }
-                            FightCtrl.FightMonster = monster;
-                            // sql = "select * from user_partner where fight = 1 and userId = ?";
-                            sql = "select b.id, a.name, a.att, a.def, a.hp, a.mp, b.level, a.agile " +
-                                "from partner a inner join user_partner b on a.id = b.partnerId and b.fight = 1";
-                            args = [session.uid];
-                            dbclient.query(sql, args, function (err, partner) {
-                                if (! err) {
-                                    var u_data = [];
-                                    var userAgile = 0;//我方先手值
-                                    for (var i in partner) {
-                                        u_data.push({
-                                            id : partner[i].id,
-                                            name : partner[i].name,
-                                            def : partner[i].def,
-                                            hp : partner[i].hp,
-                                            mp : partner[i].mp,
-                                            level : partner[i].level,
-                                            agile : partner[i].agile,
-                                            camp : "user",
-                                            att : partner[i].att
-                                        });
-                                        userAgile += partner[i].agile;
-                                    }
-                                    FightCtrl.FightUsers = u_data;
-                                    //返回玩家对阵数据
-                                    next(null, {
-                                        code : Code.OK,
-                                        monsters : monster,
-                                        users : u_data
-                                    });
-                                    //快速战斗计算
-                                    // FightCtrl.QuickFight(monster, partner, function (data) {
-                                    //     next(null, {code : 1, data : data});
-                                    // });
-                                } else {
-                                    console.log(err);
-                                }
-                            })
-                        } else {
-                            console.log(err);
-                        }
-                    })
-                } else {
-                    next(null, {code : Code.FAIL, content : "请先前往客栈获取一直随从"});
-                }
+                db.getCheckPointMonster(mapId, function (res) {
+                    console.log(res);
+                })
             }
         })
+        // var sql = "select firstpartner from user where id = ?";
+        // var args = [session.uid];
+        // dbclient.query(sql, args, function (err, first) {
+        //     if (err) {
+        //         console.warn(err)
+        //     } else {
+        //         if (first[0].firstpartner != 0) {
+        //             sql = "select * from monster where checkpoint = 1";
+        //             args = [];
+        //             dbclient.query(sql, args, function (err, monster) {
+        //                 if (! err) {
+        //                     var monsterAgiel = 0;//敌方先手值
+        //                     for (var i in monster) {
+        //                         monster[i]["camp"] = "monster"
+        //                         monsterAgiel += monster[i].agile;
+        //                     }
+        //                     FightCtrl.FightMonster = monster;
+        //                     // sql = "select * from user_partner where fight = 1 and userId = ?";
+        //                     sql = "select b.id, a.name, a.att, a.def, a.hp, a.mp, b.level, a.agile " +
+        //                         "from partner a inner join user_partner b on a.id = b.partnerId and b.fight = 1";
+        //                     args = [session.uid];
+        //                     dbclient.query(sql, args, function (err, partner) {
+        //                         if (! err) {
+        //                             var u_data = [];
+        //                             var userAgile = 0;//我方先手值
+        //                             for (var i in partner) {
+        //                                 u_data.push({
+        //                                     id : partner[i].id,
+        //                                     name : partner[i].name,
+        //                                     def : partner[i].def,
+        //                                     hp : partner[i].hp,
+        //                                     mp : partner[i].mp,
+        //                                     level : partner[i].level,
+        //                                     agile : partner[i].agile,
+        //                                     camp : "user",
+        //                                     att : partner[i].att
+        //                                 });
+        //                                 userAgile += partner[i].agile;
+        //                             }
+        //                             FightCtrl.FightUsers = u_data;
+        //                             //返回玩家对阵数据
+        //                             next(null, {
+        //                                 code : Code.OK,
+        //                                 monsters : monster,
+        //                                 users : u_data
+        //                             });
+        //                             //快速战斗计算
+        //                             // FightCtrl.QuickFight(monster, partner, function (data) {
+        //                             //     next(null, {code : 1, data : data});
+        //                             // });
+        //                         } else {
+        //                             console.log(err);
+        //                         }
+        //                     })
+        //                 } else {
+        //                     console.log(err);
+        //                 }
+        //             })
+        //         } else {
+        //             next(null, {code : Code.FAIL, content : "请先前往客栈获取一直随从"});
+        //         }
+        //     }
+        // })
     } else {
         next(null, {
             code : Code.FAIL,
