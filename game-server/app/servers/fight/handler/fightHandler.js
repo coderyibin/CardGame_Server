@@ -21,7 +21,7 @@ fight.startFight = function (msg, session, next) {
     var rid = msg.rid;
     if (!! mapId && rid) {
         db.getIsFirstPartner(rid, function (msg) {
-            if (msg.firstid == 0) {//没有随从，不可进试炼场
+            if (msg.firstId == 0) {//没有随从，不可进试炼场
                 next(null, {
                     code : Code.PARTNER.NONE,
                     content : "没有随从，不能进试炼场"

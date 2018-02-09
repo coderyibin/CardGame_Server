@@ -133,6 +133,10 @@ db.insertUserPartner = function (msg, cb) {
     var args = [];
     db._mysqlQuery(sql, args, cb, "insertUserPartner");
 }
+//获取随从数据
+db.getPartnerData = function (id) {
+
+}
 
 db._mysqlQuery = function (sql, args, cb, fname) {
     dbclient.query(sql, args, function (err, res) {
