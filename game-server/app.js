@@ -22,7 +22,7 @@ app.configure('production|development', 'partner | testField | fight', function 
         connector: pomelo.connectors.hybridconnector,
         useProtobuf : true
     })
-})
+});
 
 // app configuration
 app.configure('production|development', 'connector', function(){

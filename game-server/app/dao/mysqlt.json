@@ -47,12 +47,26 @@ armor  INT(4)not null COMMENT "护甲值"
 CREATE table game_partner(
 id int(4) auto_increment PRIMARY key COMMENT "id，自增长",
 name varchar(255) not null comment "名称",
-level int(4) Not null COMMENT "等级",
 hp INT(4) not null COMMENT "血量",
 mp INT(4) not null COMMENT "魔量",
 strength INT(4) not null COMMENT "力量",
 wakan int(4) not null COMMENT "灵力",
 agile INT(4) not NULL COMMENT "敏捷",
-equipment VARCHAR(255)not null COMMENT "装备",
 Armor  INT(4)not null COMMENT "护甲值"
 )comment="随从表"
+
+//玩家随从表
+CREATE table game_user_partner(
+id int(4) auto_increment PRIMARY key COMMENT "id，自增长",
+name varchar(255) not null comment "名称",
+userId int(4) not null comment "随从归属的玩家角色id",
+partnerId int(4) not null comment "随从归属的随从表id",
+equipment VARCHAR(255)not null COMMENT "装备",
+hp INT(4) not null COMMENT "血量",
+mp INT(4) not null COMMENT "魔量",
+strength INT(4) not null COMMENT "力量",
+wakan int(4) not null COMMENT "灵力",
+agile INT(4) not NULL COMMENT "敏捷",
+armor  INT(4)not null COMMENT "护甲值",
+level int(4) Not null COMMENT "等级"
+)comment="玩家随从表"

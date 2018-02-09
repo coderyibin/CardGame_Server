@@ -114,6 +114,26 @@ db.getCheckPointMonster = function (map, cb) {
     db._mysqlQuery(sql, args, cb, "getCheckPointMonster");
 }
 
+//获取玩家第一只随从
+db.getPlayerFirstPartner = function (uid, cb) {
+    var sql = "select * from game_partner where first = 1";
+    var args = [];
+    db._mysqlQuery(sql, args, cb, "getPlayerFirstPartner");
+}
+//更新玩家第一只随从信息
+db.updateFirstPartner = function (rid, partnerId, cb) {
+    var sql = "update game_user set firstId = ? where rid = ?";
+    var args = [partnerId, rid];
+    db._mysqlQuery(sql, args, cb, "updateFirstPartner");
+}
+//插入玩家随从表
+db.insertUserPartner = function (msg, cb) {
+    var sql = "insert into game_user_partner (name, userId, partnerId, equipment, hp, mp, strength, wakan, agile, armor, level)" +
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ? ?, ?)";
+    var args = [];
+    db._mysqlQuery(sql, args, cb, "insertUserPartner");
+}
+
 db._mysqlQuery = function (sql, args, cb, fname) {
     dbclient.query(sql, args, function (err, res) {
         if (err) {
