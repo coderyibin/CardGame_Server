@@ -16,7 +16,10 @@ var handler = Handler.prototype;
 handler.getPartner = function (msg, session, next) {
     var uid = msg.uid;
     if (uid) {
-        PartnerCtrl.getPartner(uid, next);
+        // PartnerCtrl.getPartner(uid, next);
+        PartnerCtrl.getPartner(uid, function (res) {
+            next(null, {code : 200, partner : res});
+        })
     }
 }
 

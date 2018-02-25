@@ -34,18 +34,6 @@ Handler.prototype.login = function(msg, session, next) {
 	}
 	var account = msg.account;
 	var password = msg.password;
-	var self = this;
-    // userDao.Login(account, password, function (msg) {
-		// var sid = self.app.getServerId();
-		// var channel = self.channelService.getChannel(sid, true);
-		// channel.add(msg.uid, sid);
-		// if (msg.key == PushKey.SET_NAME) {
-		// 	self.channelService.pushMessageByUids("onSys",
-		// 		{key : msg.key, uid : msg.uid}, [{uid : msg.uid, sid : sid}], null, function(){});
-		// } else {
-		//
-		// }
-    // });
 	userDao.Login(account, password, session, next);
 };
 

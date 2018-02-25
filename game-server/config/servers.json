@@ -1,34 +1,34 @@
 {
   "development":{
     "connector": [
-    {"id": "connector-server-1", "host": "192.168.1.2", "port": 3150, "clientHost": "192.168.1.2", "clientPort": 3010, "frontend": true}
+    {"id": "connector-server-1", "host": "192.168.2.100", "port": 3150, "clientHost": "192.168.2.100", "clientPort": 3010, "frontend": true}
     ],"gate": [
-    {"id": "gate-server-1", "host": "192.168.1.2", "port": 2010, "clientPort": 3016, "frontend": true}
+    {"id": "gate-server-1", "host": "192.168.2.100", "port": 2010, "clientPort": 3016, "frontend": true}
     ],
     "partner": [
-    {"id": "partner-server-1", "host": "192.168.1.2", "port": 2540, "clientPort": 2541}
+    {"id": "partner-server-1", "host": "192.168.2.100", "port": 2540, "clientPort": 2541}
     ],
     "testField": [
-    {"id": "testField-server-1", "host": "192.168.1.2", "port": 2542, "clientPort": 2543}
+    {"id": "testField-server-1", "host": "192.168.2.100", "port": 2542, "clientPort": 2543}
     ],
     "fight": [
-    {"id": "fight-server-1", "host": "192.168.1.2", "port": 2544, "clientPort": 2545}
+    {"id": "fight-server-1", "host": "192.168.2.100", "port": 2544}
     ]
   },
   "production":{
     "connector": [
-      {"id": "connector-server-1", "host": "192.168.1.2", "port": 3150, "clientHost": "192.168.1.2", "clientPort": 3010, "frontend": true}
+      {"id": "connector-server-1", "host": "192.168.2.100", "port": 3150, "clientHost": "192.168.2.100", "clientPort": 3010, "frontend": true}
     ],"gate": [
-      {"id": "gate-server-1", "host": "192.168.1.2", "port": 2010, "clientPort": 3016, "frontend": true}
+      {"id": "gate-server-1", "host": "192.168.2.100", "port": 2010, "clientPort": 3016, "frontend": true}
     ],
     "partner": [
-      {"id": "partner-server-1", "host": "192.168.1.2", "port": 2540, "clientPort": 2541}
+      {"id": "partner-server-1", "host": "192.168.2.100", "port": 2540, "clientPort": 2541}
     ],
     "testField": [
-      {"id": "testField-server-1", "host": "192.168.1.2", "port": 2542, "clientPort": 2543}
+      {"id": "testField-server-1", "host": "192.168.2.100", "port": 2542, "clientPort": 2543}
     ],
     "fight": [
-      {"id": "fight-server-1", "host": "192.168.1.2", "port": 2544, "clientPort": 2545}
+      {"id": "fight-server-1", "host": "192.168.2.100", "port": 2544}
     ]
   }
 }

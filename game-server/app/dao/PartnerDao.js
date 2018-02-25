@@ -2,26 +2,28 @@ var utils = require('../util/utils');
 var UserData = require("./UserDao")
 var dbclient = require('pomelo').app.get("dbclient");
 var Code = require("../util/code");
-var db = require("dbClient");
+var db = require("./dbClient");
 
 var PartnerDao = module.exports;
+PartnerDao._partnertData = null;
 
 var channelServer = require('pomelo').app.get("channelService");
 
 //获取玩家随从
 PartnerDao.getPlayerPartner = function (rid, cb) {
     db.getPlayerFirstPartner(rid, function (res) {
-        if (res.length == 0) {//没有第一只
+        res = res[0];
+        if (res.firstId == 0) {//没有第一只
             console.log("没有随从，系统赠予");
-            res = res[0];
             db.updateFirstPartner(rid, res.id, function (res) {
-
+                cb(res);
             })
         } else {
             console.log("已经拥有第一只随从");
         }
     })
 }
+
 
 // //获取玩家随从
 // PartnerDao.getPartner = function (uid, cb) {

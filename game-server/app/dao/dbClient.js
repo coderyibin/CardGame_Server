@@ -116,26 +116,57 @@ db.getCheckPointMonster = function (map, cb) {
 
 //获取玩家第一只随从
 db.getPlayerFirstPartner = function (uid, cb) {
-    var sql = "select * from game_partner where first = 1";
-    var args = [];
+    // var sql = "select * from game_partner where first = 1";
+    // var args = [];
+    // db._mysqlQuery(sql, args, cb, "getPlayerFirstPartner");
+    var sql = "select * from game_role where id = ?";
+    var args = [uid];
     db._mysqlQuery(sql, args, cb, "getPlayerFirstPartner");
 }
 //更新玩家第一只随从信息
 db.updateFirstPartner = function (rid, partnerId, cb) {
-    var sql = "update game_user set firstId = ? where rid = ?";
-    var args = [partnerId, rid];
-    db._mysqlQuery(sql, args, cb, "updateFirstPartner");
+    db.getFirstPartner(function (res) {
+        res = res[0];
+        var sql = "update game_role set firstId = ? where id = ?";
+        var args = [res.id, rid];
+        db._mysqlQuery(sql, args, function (r) {
+            res["userId"] = rid;
+            db.insertUserPartner(res, function () {
+                cb(res);
+            });
+        }, "updateFirstPartner");
+
+    });
 }
 //插入玩家随从表
 db.insertUserPartner = function (msg, cb) {
+    console.log(msg);
     var sql = "insert into game_user_partner (name, userId, partnerId, equipment, hp, mp, strength, wakan, agile, armor, level)" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ? ?, ?)";
-    var args = [];
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    var args = [msg.name, msg.userId, msg.id, "{}", msg.hp, msg.mp, msg.strength, msg.wakan, msg.agile, msg.armor, 1];
     db._mysqlQuery(sql, args, cb, "insertUserPartner");
 }
-//获取随从数据
-db.getPartnerData = function (id) {
+//获取第一只随从
+db.getFirstPartner = function (cb) {
+    var sql = "select * from game_partner where first=1";
+    var args = [];
+    db._mysqlQuery(sql, args, cb, "getFirstPartner");
+}
 
+//获取玩家随从
+db.getUserPartner = function (rid, cb) {
+    var sql = "select * from game_user_partner where userId = ?";
+    var args = [rid];
+    db._mysqlQuery(sql, args, cb, "getUserPartner");
+}
+
+//获取随从数据
+db.getPartnerData = function (id, cb) {
+    var sql = "select * from game_partner where 1";
+    var args = [];
+    db._mysqlQuery(sql, args, function (res) {
+        cb(res);
+    }, "getPartnerData");
 }
 
 db._mysqlQuery = function (sql, args, cb, fname) {

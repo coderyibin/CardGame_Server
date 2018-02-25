@@ -28,7 +28,11 @@ fight.startFight = function (msg, session, next) {
                 });
             } else {
                 db.getCheckPointMonster(mapId, function (res) {
-                    console.log(res);
+                    // console.log(res);
+                    next(null, {
+                        code : Code.OK,
+                        monster : res
+                    });
                 })
             }
         })
@@ -105,52 +109,80 @@ fight.startFight = function (msg, session, next) {
 
 //请求战斗
 fight.reqFight = function (msg, session, next) {
-    var attId = msg.attId;
-    if (!! attId) {//手动战斗
-
+    var auto = msg.auto;
+    var monsters = msg.monsters;
+    var users = msg.users;
+    if (! monsters || ! users) {
+        next(
+            null,
+            {
+                code : Code.FAIL,
+                centent : "参数错误"
+            }
+        );
+        return;
+    }
+    if (monsters.length == 0) {
+        next(
+            null,
+            {
+                code : Code.FIGHT.RESULT
+            }
+        ); return;
+    }
+    if (! auto) {//手动战斗
+        next(
+            null, {
+                code : Code.OK,
+                content : "手动战斗"
+            }
+        );
     } else {//自动战斗
-        var users = FightCtrl.FightUsers;
-        var userAgile = 0;
-        var monsterAgile = 0;
-        var monsters = FightCtrl.FightMonster;
+        var u_agile = 0;//我方先手值
+        var m_agile = 0;//敌方先手值
         for (var i = 0; i < users.length; i ++) {
-            userAgile += users[i].agile;
+            u_agile += users[i].agile;
         }
         for (var i = 0; i < monsters.length; i ++) {
-            monsterAgile += monsters[i].agile;
+            m_agile += monsters[i].agile;
         }
-        if (monsterAgile > userAgile) {//敌方优先动手
+        if (m_agile > u_agile) {//敌方先手值
             var data = FightCtrl.reqAutoFight(monsters, users);
             monsters = data.att;
             users = data.tar;
             var f = data.f;
             data = FightCtrl.reqAutoFight(users, monsters);
-            users = data.att;
             monsters = data.tar;
+            users = data.att;
             f = f.concat(data.f);
             next(null, {
                 code : Code.OK,
-                data : f,
-                first : "monster"//阵营先
+                bout : f,
+                monsters : monsters,
+                users : users
             });
-            FightCtrl.FightMonster = monsters;
-            FightCtrl.FightUsers = users;
         } else {
+            //我方先手值
             var data = FightCtrl.reqAutoFight(users, monsters);
             users = data.att;
             monsters = data.tar;
             var f = data.f;
             data = FightCtrl.reqAutoFight(monsters, users);
-            monsters = data.att;
             users = data.tar;
+            monsters = data.att;
             f = f.concat(data.f);
             next(null, {
                 code : Code.OK,
-                data : f,
-                first : "user"//阵营先
+                bout : f,
+                monsters : monsters,
+                users : users
             });
-            FightCtrl.FightMonster = monsters;
-            FightCtrl.FightUsers = users;
         }
+        // var result = FightCtrl.FightResult(users, monsters);
+        // if (result === true) {//胜利
+        //
+        // } else if (result === false) {//失败
+        //
+        // }
     }
 }

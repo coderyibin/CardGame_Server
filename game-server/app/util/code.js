@@ -11,5 +11,8 @@ module.exports = {
         UID : 601,//获取随从传入的rid为空
         FIRST : 602,//已经拥有 第一只随从
         NONE : 603//身上没有随从
+    },
+    FIGHT : {
+        RESULT : 611//战斗结算
     }
 };

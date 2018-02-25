@@ -7,23 +7,13 @@ var PushKey = require("../util/pushKey");
 var channelService = require("pomelo").app.get("channelService");
 var Config = require("../util/config");
 var db = require('../dao/dbClient');
+var fightRemote = require("../servers/fight/remote/fightRemote")
 var UserDao = module.exports;
 UserDao.UserInfo = null;
+UserDao.PartnerInfo = null;
 
 //玩家登陆
 UserDao.Login = function (account, password, session, cb, exits) {
-
-    // this.QueryUserExits(account, password, function (exits) {
-    //     if (! exits) {
-    //         //前往注册
-    //         UserDao.Register(account, password, function (uid) {
-    //             cb({uid : uid, key : PushKey.SET_NAME});
-    //         });
-    //     } else {
-    //         //前往判断是否有角色，是否需要创建角色
-    //
-    //     }
-    // });
     if (! exits) {
         this.QueryUserExits(account, password, session, cb);
     } else {
@@ -50,24 +40,12 @@ UserDao.Login = function (account, password, session, cb, exits) {
                         key : PushKey.SET_NAME
                     }, [{uid : exits.id, sid : sid}], null, function () {});
                 } else {
-                    utils.invokeCallback(cb, null, {
-                        code : Code.OK
-                    })
-                    var rid = msg[0].rid;
-                    session.bind(rid);//绑定角色id
-                    session.on('closed', onUserLeave.bind(null, this.app));
-                    var channel = channelService.getChannel(sid, true);
-                    channel.add(rid, sid);
-                    // UserDao.JoinGame(session, msg[0]);
-                    //推送消息进入设置名称界面
-                    channelService.pushMessageByUids("onSys", {
-                        key : PushKey.JOIN_MAIN
-                    }, [{uid : rid, sid : sid}], null, function () {});
-                    //推送玩家数据
-                    channelService.pushMessageByUids("onSys", {
-                        key : PushKey.UPDATE_USER_INFO,
-                        data : msg[0]
-                    }, [{uid : rid, sid : sid}], null, function(){});
+                    var rid = msg[0].id;
+                    db.getUserPartner(rid, function (res) {
+                        // console.log(res);
+                        UserDao.PartnerInfo = res;
+                        UserDao.pushMsg(session, rid, cb);
+                    });
                     UserDao.UserInfo = msg[0];//角色信息
                 }
             })
@@ -80,6 +58,45 @@ UserDao.Login = function (account, password, session, cb, exits) {
         }
     }
 };
+
+UserDao.pushMsg = function (session, rid, cb) {
+    if (!! UserDao.UserInfo && !! UserDao.PartnerInfo) {
+        var sid = require('pomelo').app.getServerId();
+        session.bind(rid);//绑定角色id
+        session.on('closed', onUserLeave.bind(null, this.app));
+        var channel = channelService.getChannel(sid, true);
+        channel.add(rid, sid);
+        // UserDao.JoinGame(session, msg[0]);
+        //推送消息进入设置名称界面
+        channelService.pushMessageByUids("onSys", {
+            key: PushKey.JOIN_MAIN
+        }, [{uid: rid, sid: sid}], null, function () {
+        });
+        //推送玩家数据
+        channelService.pushMessageByUids("onSys", {
+                key: PushKey.UPDATE_USER_INFO,
+                data: this.UserInfo
+            }, [{uid: rid, sid: sid}], null, function () {
+        });
+        //推送随从数据
+        channelService.pushMessageByUids("onSys", {
+            key : PushKey.UPDATE_PARTNER_INFO,
+            data : this.PartnerInfo
+        }, [{uid: rid, sid: sid}], null, function () {
+        });
+        utils.invokeCallback(cb, null, {
+            code: Code.OK
+        });
+        // pomelo.app.rpc.fight.fightRemote.add(session, rid, sid, sid, true, function(users){
+        //     // next(null, {
+        //     //     users:users
+        //     // });
+        //     console.log(users);
+        // });
+    } else {
+        console.log("数据错误");
+    }
+}
 
 UserDao.CreateRole = function (uid, name, cb) {
     // db.createRole(uid, name, function (msg) {

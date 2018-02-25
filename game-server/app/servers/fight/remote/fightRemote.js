@@ -9,6 +9,6 @@ var fightRemote = function (app) {
 
 var remote = fightRemote.prototype;
 
-remote.createChannel = function (rid, sid) {
-    console.log(rid);
+remote.add = function (rid, sid, name, flag, cb) {
+    console.log(rid, sid, name);
 }

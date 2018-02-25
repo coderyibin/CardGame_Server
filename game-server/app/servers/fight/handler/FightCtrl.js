@@ -44,21 +44,28 @@ Fight.QuickFight = function (monsters, users, cb) {
 Fight.reqAutoFight = function (att, tar) {
     var f = [];
     for (var i = 0; i < att.length; i ++) {
-        var index = utils.random(tar.length - 1);
-        var subHp = att[i].att - tar[index].def;
-        tar[index].hp -= subHp;
-        var die = false;
-        if (tar[index].hp <= 0) {
-            tar.splice(index, 1);
-            die = true;
+        var index = utils.random(0, tar.length - 1);
+        if (att[i].hp <= 0 || tar[index].hp <= 0) {
+            continue;
         }
+        var v_att = att[i].strength;
+        var v_def = tar[index].armor;
+        var subHp = v_att - v_def;
+        tar[index].hp -= subHp;
+        // var die = false;
+        // if (tar[index].hp <= 0) {
+        //     // tar.splice(index, 1);
+        //     die = true;
+        // }
         f.push({
             attId : att[i].id,
             attName : att[i].name,
             attTag : tar[index].id,
+            attIndex : i,
+            TagIndex : index,
             tarName : tar[index].name,
             sub : subHp,
-            die : die
+            userId : att[i].userId || 0
         });
     }
     return {
@@ -66,4 +73,29 @@ Fight.reqAutoFight = function (att, tar) {
         att : att,
         tar : tar
     };
+}
+
+//战斗结算
+Fight.FightResult = function (users, monsters) {
+    for (var i = 0; i < users.length;) {
+        if (users[i].hp <= 0) {
+            users.splice(i, 1);
+        } else {
+            i ++;
+        }
+    }
+    if (users.length <= 0) {
+        return false;
+    }
+    for (var  j = 0; j < monsters.length;) {
+        if (monsters[j].hp <= 0) {
+            monsters.splice(i, 1);
+        } else  {
+            j ++;
+        }
+    }
+    if (monsters.length <= 0) {
+        return true;
+    }
+    return null;
 }
