@@ -17,11 +17,11 @@ app.configure('production|development', 'gate', function () {
         useProtobuf : true
     })
 })
-app.configure('production|development', 'partner | testField', function () {
-    app.set('connectorConfig', {
-        connector: pomelo.connectors.hybridconnector,
-        useProtobuf : true
-    })
+app.configure('production|development', 'partner | testField | fight', function () {
+    // app.set('connectorConfig', {
+    //     connector: pomelo.connectors.hybridconnector,
+    //     useProtobuf : true
+    // })
 });
 
 // app configuration
@@ -52,10 +52,6 @@ app.configure('production|development', function() {
     //     }
     //     app.set('fightMap',fightMap);
     // }
-});
-
-app.configure('production|development', 'fight', function () {
-
 });
 
 // start app
